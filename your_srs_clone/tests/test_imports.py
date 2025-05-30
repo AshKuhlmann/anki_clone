@@ -14,5 +14,9 @@ def test_import_your_srs_clone():
         print(f"Failed to import your_srs_clone: {e}")
         assert False, "your_srs_clone failed to import"
 
+def test_package_importable():
+    """Test that the your_srs_clone package can be imported."""
+    import your_srs_clone
+
 if __name__ == "__main__":
     test_import_your_srs_clone()
