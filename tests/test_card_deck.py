@@ -114,3 +114,50 @@ def test_api_remove_card_from_deck(setup_database):
     data = response.json()
     assert data["card_id"] == card_id
     assert data["deck_id"] == deck_id
+
+# Test reviewing a card via API
+def test_api_review_card(setup_database):
+    # Create a card via API
+    response = client.post("/cards/", json={"question": "API Question", "answer": "API Answer"})
+    card_id = response.json()["id"]
+    assert response.status_code == 200
+
+    # Review the card as correct
+    response = client.post(f"/cards/{card_id}/review?response=correct")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify the card's SM-2 parameters were updated
+    assert data["review_count"] == 1
+    assert data["ease_factor"] > 2.5  # Ease factor should increase for correct answer
+    assert data["interval"] > 0      # Interval should be set
+
+    # Review the card as incorrect
+    response = client.post(f"/cards/{card_id}/review?response=incorrect")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify the card's SM-2 parameters were updated
+    assert data["review_count"] == 2
+    assert data["ease_factor"] < 2.5  # Ease factor should decrease for incorrect answer
+    assert data["interval"] == 0      # Interval should be reset
+
+    # Review the card as hard
+    response = client.post(f"/cards/{card_id}/review?response=hard")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify the card's SM-2 parameters were updated
+    assert data["review_count"] == 3
+    assert data["ease_factor"] < 2.5  # Ease factor should decrease for hard question
+    assert data["interval"] > 0       # Interval should be increased
+
+    # Review the card as good
+    response = client.post(f"/cards/{card_id}/review?response=good")
+    assert response.status_code == 200
+    data = response.json()
+
+    # Verify the card's SM-2 parameters were updated
+    assert data["review_count"] == 4
+    assert data["ease_factor"] > 2.5  # Ease factor should increase for good question
+    assert data["interval"] > 0       # Interval should be increased
