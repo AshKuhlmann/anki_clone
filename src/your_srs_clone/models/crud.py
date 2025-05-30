@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from .card import CardModel
 from .deck import DeckModel
+from .card_deck import cards_decks
 
 # Create a new card in the database
 def create_card(db: Session, question: str, answer: str):
@@ -81,3 +82,43 @@ def delete_deck(db: Session, deck_id: int):
     db.delete(db_deck)
     db.commit()
     return db_deck
+
+# Add a card to a deck
+def add_card_to_deck(db: Session, card_id: int, deck_id: int):
+    db_card = get_card(db, card_id)
+    db_deck = get_deck(db, deck_id)
+
+    if not db_card or not db_deck:
+        return False
+
+    # Check if the relationship already exists
+    existing_relationship = db.query(cards_decks).filter(
+        cards_decks.c.card_id == card_id,
+        cards_decks.c.deck_id == deck_id
+    ).first()
+
+    if existing_relationship:
+        return True
+
+    # Create the relationship
+    stmt = cards_decks.insert().values(card_id=card_id, deck_id=deck_id)
+    db.execute(stmt)
+    db.commit()
+    return True
+
+# Remove a card from a deck
+def remove_card_from_deck(db: Session, card_id: int, deck_id: int):
+    db_card = get_card(db, card_id)
+    db_deck = get_deck(db, deck_id)
+
+    if not db_card or not db_deck:
+        return False
+
+    # Delete the relationship
+    stmt = cards_decks.delete().where(
+        cards_decks.c.card_id == card_id,
+        cards_decks.c.deck_id == deck_id
+    )
+    db.execute(stmt)
+    db.commit()
+    return True

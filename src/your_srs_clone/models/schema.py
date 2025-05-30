@@ -34,3 +34,7 @@ class DeckResponse(DeckBase):
 
     class Config:
         orm_mode = True
+
+class CardDeckCreate(BaseModel):
+    card_id: int
+    deck_id: int
