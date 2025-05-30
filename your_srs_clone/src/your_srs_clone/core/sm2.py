@@ -12,20 +12,18 @@ def sm2(card: Card, quality: int) -> Card:
     # increment review count
     card.review_count += 1
 
-    # compute next interval
-    if quality < 3: # If quality is less than 3, reset review count for interval calculation
-        card.interval = 1 # Reset interval to 1 day for failed reviews
-        # Optionally, you might want to reset review_count or handle it differently
-    elif card.review_count == 1:
+    # compute next interval based on the SM-2 algorithm
+    if quality < 3:  # If quality is less than 3, reset interval to 1 day
         card.interval = 1
-    elif card.review_count == 2:
-        card.interval = 6
     else:
-        card.interval = int(round(card.interval * card.ease_factor)) # Round to nearest int
-
-    # Ensure interval is at least 1 if quality >=3
-    if quality >=3 and card.interval < 1:
-        card.interval = 1
+        # For quality >= 3, set interval based on review_count
+        if card.review_count == 1:
+            card.interval = 1
+        elif card.review_count == 2:
+            card.interval = 6
+        else:
+            # For review_count > 2, interval should be card.interval * card.ease_factor
+            card.interval = int(round(card.interval * card.ease_factor))
 
     # set new due date
     card.due_date = date.today() + timedelta(days=card.interval)
