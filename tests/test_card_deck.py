@@ -75,3 +75,42 @@ def test_remove_card_from_deck(setup_database):
         ).filter(CardModel.id == card.id).first()
 
         assert card_in_deck is None
+
+# API Tests
+def test_api_add_card_to_deck(setup_database):
+    # Create a card and deck via API
+    response = client.post("/cards/", json={"question": "API Question", "answer": "API Answer"})
+    card_id = response.json()["id"]
+    assert response.status_code == 200
+
+    response = client.post("/decks/", json={"name": "API Deck"})
+    deck_id = response.json()["id"]
+    assert response.status_code == 200
+
+    # Add the card to the deck
+    response = client.post(f"/card-deck/add?card_id={card_id}&deck_id={deck_id}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["card_id"] == card_id
+    assert data["deck_id"] == deck_id
+
+def test_api_remove_card_from_deck(setup_database):
+    # Create a card and deck via API
+    response = client.post("/cards/", json={"question": "API Question 2", "answer": "API Answer 2"})
+    card_id = response.json()["id"]
+    assert response.status_code == 200
+
+    response = client.post("/decks/", json={"name": "API Deck 2"})
+    deck_id = response.json()["id"]
+    assert response.status_code == 200
+
+    # Add the card to the deck
+    response = client.post(f"/card-deck/add?card_id={card_id}&deck_id={deck_id}")
+    assert response.status_code == 200
+
+    # Remove the card from the deck
+    response = client.delete(f"/card-deck/remove?card_id={card_id}&deck_id={deck_id}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["card_id"] == card_id
+    assert data["deck_id"] == deck_id
