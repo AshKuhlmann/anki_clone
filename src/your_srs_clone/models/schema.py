@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
+from typing import Optional
 
 class CardBase(BaseModel):
     question: str
@@ -9,32 +9,15 @@ class CardBase(BaseModel):
 class CardCreate(CardBase):
     pass
 
-class CardUpdate(BaseModel):
-    question: Optional[str] = None
-    answer: Optional[str] = None
+class CardUpdate(CardBase):
+    pass
 
 class CardResponse(CardBase):
     id: int
-    ease_factor: float
-    interval: int
-    review_count: int
-    due_date: date
+    review_count: int = 0
+    ease_factor: float = 2.5
+    interval: int = 0
+    due_date: Optional[datetime] = None
 
     class Config:
         orm_mode = True
-
-class DeckBase(BaseModel):
-    name: str
-
-class DeckCreate(DeckBase):
-    pass
-
-class DeckResponse(DeckBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-class CardDeckCreate(BaseModel):
-    card_id: int
-    deck_id: int
