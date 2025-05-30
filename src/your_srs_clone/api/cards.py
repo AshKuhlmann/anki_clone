@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
+from datetime import date
 
 from ..models.crud import create_card, get_all_cards, get_card, update_card, delete_card
 from ..models.schema import CardCreate, CardResponse, CardUpdate
 from ..models.database import get_db
+from ..models.models import Card
 
 router = APIRouter(
     prefix="/cards",
@@ -64,3 +66,18 @@ def review_card(card_id: int, response: str, db: Session = Depends(get_db)):
     db.refresh(db_card)
 
     return db_card
+
+@router.get("/due", response_model=List[CardResponse])
+def get_due_cards(db: Session = Depends(get_db)):
+    """Get all cards that are due for review.
+
+    Returns:
+        A list of cards that are due for review.
+    """
+    today = date.today()
+    cards = db.query(Card).filter(
+        (Card.due_date <= today) |
+        ((Card.review_count == 0) & (Card.due_date <= today))
+    ).all()
+
+    return cards
