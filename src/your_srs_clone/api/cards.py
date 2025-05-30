@@ -41,3 +41,26 @@ def delete_card_route(card_id: int, db: Session = Depends(get_db)):
     if db_card is None:
         raise HTTPException(status_code=404, detail="Card not found")
     return db_card
+
+@router.post("/{card_id}/review", response_model=CardResponse)
+def review_card(card_id: int, response: str, db: Session = Depends(get_db)):
+    """Review a card and update its SM-2 parameters.
+
+    Args:
+        card_id: The ID of the card to review.
+        response: The user's response ('correct', 'incorrect', 'hard', or 'good').
+        db: The database session.
+
+    Returns:
+        The updated card.
+    """
+    db_card = get_card(db, card_id)
+    if db_card is None:
+        raise HTTPException(status_code=404, detail="Card not found")
+
+    # Update the card's SM-2 parameters based on the response
+    db_card.update_after_review(response)
+    db.commit()
+    db.refresh(db_card)
+
+    return db_card
