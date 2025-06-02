@@ -5,6 +5,9 @@ import models
 from database import engine, SessionLocal
 
 def main():
+    # Drop existing tables if they exist
+    models.Base.metadata.drop_all(bind=engine)
+
     # Create the database tables (if they don't exist)
     models.Base.metadata.create_all(bind=engine)
 
@@ -26,7 +29,13 @@ def main():
         deck=deck
     )
 
-    # Add the deck and cards to the database
+    # Create a user config
+    user_config = models.UserConfigModel(
+        default_new_card_interval=2,
+        starting_ease_factor=2.7
+    )
+
+    # Add the deck, cards and user config to the database
     with SessionLocal() as session:
         session.add(deck)
         session.commit()
@@ -34,6 +43,9 @@ def main():
         # Now add the cards (which have a foreign key to the deck)
         session.add(card1)
         session.add(card2)
+
+        # Add user config
+        session.add(user_config)
         session.commit()
 
     # Query the database to verify our data
@@ -46,6 +58,12 @@ def main():
             print("Cards:")
             for card in deck.cards:
                 print(f"  - {card.front_text}")
+
+        # Query user config
+        user_configs = session.query(models.UserConfigModel).all()
+        print(f"Found {len(user_configs)} user configs")
+        for config in user_configs:
+            print(f"User Config: {config}")
 
 if __name__ == "__main__":
     main()

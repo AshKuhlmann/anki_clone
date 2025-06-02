@@ -45,6 +45,16 @@ class Card:
         return (f"Card(id={self.id}, front_text='{self.front_text}', "
                 f"deck_name='{self.deck_name}', due_date={self.due_date})")
 
+class UserConfigModel(Base):
+    __tablename__ = 'user_configs'
+
+    id = Column(Integer, primary_key=True)  # Simple PK, e.g., for a single settings profile
+    default_new_card_interval = Column(Integer, nullable=False, default=1)
+    starting_ease_factor = Column(Float, nullable=False, default=2.5)
+
+    def __repr__(self):
+        return f"<UserConfigModel(id={self.id}, default_interval={self.default_new_card_interval})>"
+
 class UserConfig:
     def __init__(self,
                  default_new_card_interval: int = 1,
