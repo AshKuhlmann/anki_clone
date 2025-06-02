@@ -25,3 +25,14 @@ class Card:
     def __repr__(self):
         return (f"Card(id={self.id}, front_text='{self.front_text}', "
                 f"deck_name='{self.deck_name}', due_date={self.due_date})")
+
+class UserConfig:
+    def __init__(self,
+                 default_new_card_interval: int = 1,
+                 starting_ease_factor: float = 2.5):
+        self.default_new_card_interval = default_new_card_interval
+        self.starting_ease_factor = starting_ease_factor
+
+    def __repr__(self):
+        return (f"UserConfig(default_new_card_interval={self.default_new_card_interval}, "
+                f"starting_ease_factor={self.starting_ease_factor})")
